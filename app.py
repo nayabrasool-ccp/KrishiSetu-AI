@@ -2,7 +2,6 @@ import streamlit as st
 import random
 import pandas as pd
 from datetime import datetime, timedelta
-from PIL import Image
 
 # Set widescreen operational layout parameters
 st.set_page_config(page_title="KrishiSetu AI - Operations Hub", page_icon="🌾", layout="wide")
@@ -33,37 +32,25 @@ with col_left:
         crop_type = st.selectbox("🌱 Crop Category:", ["Chilli", "Tomato", "Potato", "Onion"])
         volume_kg = st.number_input("⚖️ Est. Weight (Quintals):", min_value=1.0, value=25.0, step=0.5)
         
-        uploaded_file = st.file_uploader("📸 Capture/Upload Batch Sample Image:", type=["jpg", "jpeg", "png"])
+        # --- FIX: FORCED LIVE CAMERA CAPTURE ONLY ---
+        # Replaced file uploader with direct camera interface so users cannot upload gallery files.
+        camera_file = st.camera_input("📸 Take a Live Picture of the Harvest:")
         
-        if uploaded_file is not None:
-            st.image(uploaded_file, caption="Inbound Reference Image View", use_container_width=True)
-            
+        if camera_file is not None:
             if st.button("PRODUCE ANALYSIS & ALLOCATE SLOT"):
-                # Open image properties utilizing PIL to access backend file metrics
-                img = Image.open(uploaded_file)
-                width, height = img.size
-                
-                # --- NEW ENHANCED SECURITY METHOD: PROPORTIONAL FRAUD CHECKS ---
-                # Real live phone camera frames use high-resolution rectangular aspects (e.g. 4:3 or 16:9 ratio blocks).
-                # Web assets are usually square profiles or cropped to even coordinates.
-                is_perfect_square = (width == height)
-                is_low_res_web = (width < 800 or height < 800)
-                
-                # Flag asset fraud instances based on internal metadata dimensions rather than text strings
-                if is_perfect_square or is_low_res_web:
-                    st.error("🚨 FRAUD DETECTED: Uploaded asset format failed camera profile metrics. System rejects internet downloads. Please use a live mobile camera capture.")
-                    st.session_state['active_run'] = False
-                else:
-                    # Save state variables securely to cache memory blocks
-                    st.session_state['active_run'] = True
-                    st.session_state['timestamp'] = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
-                    st.session_state['reporting'] = (datetime.now() + timedelta(hours=3)).strftime('%Y-%m-%d %I:%M %p')
-                    st.session_state['token'] = f"KSETU-2026-{random.randint(1000, 9999)}"
-                    st.session_state['f_name'] = farmer_name
-                    st.session_state['c_type'] = crop_type
-                    st.session_state['weight'] = volume_kg
+                # Save state variables securely to cache memory blocks with true live current time
+                st.session_state['active_run'] = True
+                st.session_state['timestamp'] = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+                st.session_state['reporting'] = (datetime.now() + timedelta(hours=3)).strftime('%Y-%m-%d %I:%M %p')
+                st.session_state['token'] = f"KSETU-2026-{random.randint(1000, 9999)}"
+                st.session_state['f_name'] = farmer_name
+                st.session_state['c_type'] = crop_type
+                st.session_state['weight'] = volume_kg
+        else:
+            # Re-set session state if no image is present to prevent layout persistence errors
+            st.session_state['active_run'] = False
 
-# RIGHT COLUMN: REGIONAL PROCUREMENT ENGINE
+# RIGHT COLUMN: SYSTEM OPERATIONS LEDGER
 with col_right:
     st.markdown("### 🏢 Central Management Grid")
     st.caption("Live logistical monitoring and authentication ledgers.")
@@ -88,7 +75,7 @@ with col_right:
         with m1:
             st.metric(label="AI Assigned Quality Grade", value="GRADE-B")
         with m2:
-            st.metric(label="Metadata Check", value="CAMERA SOURCE")
+            st.metric(label="Source Verification", value="LIVE CAMERA")
         with m3:
             st.metric(label="Dynamic Time Validation", value="PASSED")
             
@@ -119,5 +106,4 @@ with col_right:
         })
         st.dataframe(mock_table_records, use_container_width=True, hide_index=True)
     else:
-        st.info("Awaiting Input Transmission: Please provide an authentic, live rectangular image file from your camera roll to run verification microservices.")
-        
+        st.info("⌛ **Security System Active:** Please capture a live photograph using the device camera box above to view grading analysis logs.")
