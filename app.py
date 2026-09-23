@@ -15,7 +15,8 @@ st.markdown("""
     .mandi-card { padding: 15px; border-radius: 12px; background-color: white; border-left: 5px solid #10B981; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 10px; }
     .metric-box { text-align: center; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); }
     </style>
-""", unsafe_allow_index=True)
+""", unsafe_allow_html=True)
+
 
 # --- TOP BANNER ---
 st.markdown("<div style='background-color:#1E293B; padding:20px; border-radius:12px; margin-bottom:25px;'><h1 style='color:white; margin:0;'>KrishiSetu AI 🌾</h1><p style='color:#94A3B8; margin:5px 0 0 0;'>Unified Agricultural Procurement, Quality Assurance & Transit Optimization Suite</p></div>", unsafe_allow_html=True)
