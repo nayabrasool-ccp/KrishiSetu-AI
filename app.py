@@ -139,3 +139,4 @@ with col_right:
         st.dataframe(mock_table_records, use_container_width=True, hide_index=True)
     else:
         st.info("⌛ **Awaiting Input Transmission:** Please upload a valid rectangular photograph file to initialize verification microservices.")
+        
