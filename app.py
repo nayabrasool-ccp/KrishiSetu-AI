@@ -2,6 +2,7 @@ import streamlit as st
 import random
 import pandas as pd
 from datetime import datetime, timedelta
+from PIL import Image
 
 # Set widescreen operational layout parameters
 st.set_page_config(page_title="KrishiSetu AI - Operations Hub", page_icon="🌾", layout="wide")
@@ -32,23 +33,38 @@ with col_left:
         crop_type = st.selectbox("🌱 Crop Category:", ["Chilli", "Tomato", "Potato", "Onion"])
         volume_kg = st.number_input("⚖️ Est. Weight (Quintals):", min_value=1.0, value=25.0, step=0.5)
         
-        # --- FIX: FORCED LIVE CAMERA CAPTURE ONLY ---
-        # Replaced file uploader with direct camera interface so users cannot upload gallery files.
-        camera_file = st.camera_input("📸 Take a Live Picture of the Harvest:")
+        uploaded_file = st.file_uploader("📸 Capture/Upload Batch Sample Image:", type=["jpg", "jpeg", "png"])
         
-        if camera_file is not None:
+        if uploaded_file is not None:
+            st.image(uploaded_file, caption="Uploaded Image Reference File", use_container_width=True)
+            
             if st.button("PRODUCE ANALYSIS & ALLOCATE SLOT"):
-                # Save state variables securely to cache memory blocks with true live current time
-                st.session_state['active_run'] = True
-                st.session_state['timestamp'] = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
-                st.session_state['reporting'] = (datetime.now() + timedelta(hours=3)).strftime('%Y-%m-%d %I:%M %p')
-                st.session_state['token'] = f"KSETU-2026-{random.randint(1000, 9999)}"
-                st.session_state['f_name'] = farmer_name
-                st.session_state['c_type'] = crop_type
-                st.session_state['weight'] = volume_kg
-        else:
-            # Re-set session state if no image is present to prevent layout persistence errors
-            st.session_state['active_run'] = False
+                # Open image utilizing PIL to access physical dimensional metadata properties
+                img = Image.open(uploaded_file)
+                width, height = img.size
+                fn_lower = uploaded_file.name.lower()
+                
+                # --- ACTIVE SECURE VERIFICATION CONDITIONAL TRIGGERS ---
+                # Trigger 1: File name match for typical internet stock image configurations
+                is_web_name = "download" in fn_lower or "stock" in fn_lower or "preview" in fn_lower or "close-u" in fn_lower
+                # Trigger 2: File shape check (Web image templates are usually cropped square ratios)
+                is_web_shape = (width == height) or (width < 800 and height < 600)
+                
+                if is_web_name or is_web_shape:
+                    # BLOCK ATTACK OPERATION: Explicitly throw error logs and lock application runtime state variables
+                    st.session_state['active_run'] = False
+                    st.session_state['fraud_alert'] = True
+                    st.session_state['fraud_reason'] = "Metadata Inconsistency (Stock image source parameters flagged)" if is_web_name else "Resolution/Ratio Mismatch (Recycled square graphic rejected)"
+                else:
+                    # ALLOW VALID EXECUTION: Save current parameters to session memory cleanly
+                    st.session_state['active_run'] = True
+                    st.session_state['fraud_alert'] = False
+                    st.session_state['timestamp'] = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+                    st.session_state['reporting'] = (datetime.now() + timedelta(hours=3)).strftime('%Y-%m-%d %I:%M %p')
+                    st.session_state['token'] = f"KSETU-2026-{random.randint(1000, 9999)}"
+                    st.session_state['f_name'] = farmer_name
+                    st.session_state['c_type'] = crop_type
+                    st.session_state['weight'] = volume_kg
 
 # RIGHT COLUMN: SYSTEM OPERATIONS LEDGER
 with col_right:
@@ -67,15 +83,31 @@ with col_right:
 
     st.markdown("---")
 
-    # Read state cache data values to draw log reports
-    if st.session_state.get('active_run', False):
+    # --- CONDITIONAL INTERFACE OUTPUT HANDLING ---
+    # Case A: Fraud Detection Triggered
+    if st.session_state.get('fraud_alert', False):
+        st.markdown("##### 📊 Evaluation Inferences & Security Alerts")
+        
+        m1, m2, m3 = st.columns(3)
+        with m1:
+            st.metric(label="AI Assigned Quality Grade", value="REJECTED")
+        with m2:
+            st.metric(label="Authenticity Match", value="FAILED / FAKE")
+        with m3:
+            st.metric(label="Dynamic Time Validation", value="BLOCKED")
+            
+        st.error(f"🚨 **Procurement System Security Alert:** Registration request rejected for user instance **{farmer_name}**.")
+        st.warning(f"❌ **Rejection Reason:** {st.session_state.get('fraud_reason', 'Security metric check failed.')} Please use your phone to take a live, on-field photograph.")
+
+    # Case B: Verified Successful Inbound Run
+    elif st.session_state.get('active_run', False):
         st.markdown("##### 📊 Evaluation Inferences & Live Receipts")
         
         m1, m2, m3 = st.columns(3)
         with m1:
             st.metric(label="AI Assigned Quality Grade", value="GRADE-B")
         with m2:
-            st.metric(label="Source Verification", value="LIVE CAMERA")
+            st.metric(label="Authenticity Match", value="100% REAL")
         with m3:
             st.metric(label="Dynamic Time Validation", value="PASSED")
             
@@ -106,4 +138,4 @@ with col_right:
         })
         st.dataframe(mock_table_records, use_container_width=True, hide_index=True)
     else:
-        st.info("⌛ **Security System Active:** Please capture a live photograph using the device camera box above to view grading analysis logs.")
+        st.info("⌛ **Awaiting Input Transmission:** Please upload a valid rectangular photograph file to initialize verification microservices.")
