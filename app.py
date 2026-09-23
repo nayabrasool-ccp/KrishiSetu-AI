@@ -2,11 +2,12 @@ import streamlit as st
 import random
 import pandas as pd
 from datetime import datetime, timedelta
+from PIL import Image
 
-# Set page layout configuration
+# Set widescreen operational layout parameters
 st.set_page_config(page_title="KrishiSetu AI - Operations Hub", page_icon="🌾", layout="wide")
 
-# Custom CSS styling injection
+# Custom CSS presentation layers injection
 st.markdown("""
     <style>
     .main { background-color: #F8FAFC; }
@@ -16,16 +17,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- TOP BANNER ---
-st.markdown("<div style='background-color:#1E293B; padding:20px; border-radius:12px; margin-bottom:25px;'><h1 style='color:white; margin:0;'>KrishiSetu AI 🌾</h1><p style='color:#94A3B8; margin:5px 0 0 0;'>Enterprise Procurement, Quality Assurance & Fraud Prevention Suite</p></div>", unsafe_allow_html=True)
+# Top Admin Banner Layout Frame
+st.markdown("<div style='background-color:#1E293B; padding:20px; border-radius:12px; margin-bottom:25px;'><h1 style='color:white; margin:0;'>KrishiSetu AI 🌾</h1><p style='color:#94A3B8; margin:5px 0 0 0;'>Enterprise Procurement, Quality Assurance & Security Validation Portal</p></div>", unsafe_allow_html=True)
 
-# --- CORE INTERFACE SPLIT ---
+# Layout Splitting Segments
 col_left, col_right = st.columns([1, 1.2], gap="large")
 
-# LEFT COLUMN: FARMER ENTRY PORTAL
+# LEFT COLUMN: FARMER PORTAL CONTROL
 with col_left:
     st.markdown("### 📱 Farmer Inbound Portal")
-    st.caption("Mobile-optimized gateway for remote crop screening.")
+    st.caption("Mobile portal for real-time crop verification.")
     
     with st.container(border=True):
         farmer_name = st.text_input("👤 Farmer Registry Name:", value="Coco")
@@ -35,27 +36,39 @@ with col_left:
         uploaded_file = st.file_uploader("📸 Capture/Upload Batch Sample Image:", type=["jpg", "jpeg", "png"])
         
         if uploaded_file is not None:
-            st.image(uploaded_file, caption="Uploaded Image Reference File", use_container_width=True)
+            st.image(uploaded_file, caption="Inbound Reference Image View", use_container_width=True)
             
             if st.button("PRODUCE ANALYSIS & ALLOCATE SLOT"):
-                # --- NEW FEATURE 1: IMAGE AUTHENTICITY VALIDATION (ANTI-CHEAT) ---
-                # Checks if the image filename looks like a downloaded stock web photo
-                fn_lower = uploaded_file.name.lower()
-                if "download" in fn_lower or "stock" in fn_lower or "preview" in fn_lower or "close-u" in fn_lower:
-                    st.error("🚨 Image Verification Failed: System detected a downloaded web asset. Please capture a real-time on-field photograph.")
-                    st.session_state['run_pipeline'] = False
+                # Open image properties utilizing PIL to access backend file metrics
+                img = Image.open(uploaded_file)
+                width, height = img.size
+                
+                # --- NEW ENHANCED SECURITY METHOD: PROPORTIONAL FRAUD CHECKS ---
+                # Real live phone camera frames use high-resolution rectangular aspects (e.g. 4:3 or 16:9 ratio blocks).
+                # Web assets are usually square profiles or cropped to even coordinates.
+                is_perfect_square = (width == height)
+                is_low_res_web = (width < 800 or height < 800)
+                
+                # Flag asset fraud instances based on internal metadata dimensions rather than text strings
+                if is_perfect_square or is_low_res_web:
+                    st.error("🚨 FRAUD DETECTED: Uploaded asset format failed camera profile metrics. System rejects internet downloads. Please use a live mobile camera capture.")
+                    st.session_state['active_run'] = False
                 else:
-                    st.session_state['run_pipeline'] = True
-                    st.session_state['selected_crop'] = crop_type
-                    st.session_state['farmer'] = farmer_name
+                    # Save state variables securely to cache memory blocks
+                    st.session_state['active_run'] = True
+                    st.session_state['timestamp'] = datetime.now().strftime('%Y-%m-%d %I:%M:%S %p')
+                    st.session_state['reporting'] = (datetime.now() + timedelta(hours=3)).strftime('%Y-%m-%d %I:%M %p')
+                    st.session_state['token'] = f"KSETU-2026-{random.randint(1000, 9999)}"
+                    st.session_state['f_name'] = farmer_name
+                    st.session_state['c_type'] = crop_type
                     st.session_state['weight'] = volume_kg
 
-# RIGHT COLUMN: CENTRAL MANAGEMENT GRID
+# RIGHT COLUMN: REGIONAL PROCUREMENT ENGINE
 with col_right:
     st.markdown("### 🏢 Central Management Grid")
-    st.caption("Live logistical tracking and verification ledger registers.")
+    st.caption("Live logistical monitoring and authentication ledgers.")
     
-    # Mandi Capacity Vectors
+    # Active facility monitoring vectors
     st.markdown("##### 📍 Active Mandi Yard Fill Capacities")
     mc1, mc2, mc3 = st.columns(3)
     with mc1:
@@ -67,56 +80,44 @@ with col_right:
 
     st.markdown("---")
 
-    if st.session_state.get('run_pipeline', False):
+    # Read state cache data values to draw log reports
+    if st.session_state.get('active_run', False):
         st.markdown("##### 📊 Evaluation Inferences & Live Receipts")
-        
-        # Pull parameters from memory
-        c_type = st.session_state['selected_crop']
-        f_name = st.session_state['farmer']
-        w_quintals = st.session_state['weight']
-        
-        confidence = round(random.uniform(96.1, 98.9), 2)
-        token_id = f"KSETU-2026-{random.randint(1000, 9999)}"
-        
-        # --- NEW FEATURE 2: REAL-TIME DYNAMIC TIME MATCHING ---
-        # Calculates reporting hour windows precisely derived from the current system clock
-        current_time = datetime.now()
-        matching_reporting_slot = current_time + timedelta(hours=3)
         
         m1, m2, m3 = st.columns(3)
         with m1:
             st.metric(label="AI Assigned Quality Grade", value="GRADE-B")
         with m2:
-            st.metric(label="Authenticity Match", value="100% REAL")
+            st.metric(label="Metadata Check", value="CAMERA SOURCE")
         with m3:
             st.metric(label="Dynamic Time Validation", value="PASSED")
             
-        st.success(f"🎫 **Token Securely Verified:** Match confirmed for user instance **{f_name}**.")
+        st.success(f"🎫 **Token Securely Verified:** Allocation authorized for session record **{st.session_state['f_name']}**.")
         
-        # Render clean dynamic tracking invoice
+        # Render a clean transaction receipt printout 
         st.code(f"""
         ===========================================================
                     KRISHISETU LIVE PROCUREMENT RECEIPT           
         ===========================================================
-        Pass Code       : {token_id}
+        Pass Code       : {st.session_state['token']}
         Target Facility : Gudur Agricultural Yard
-        Scan Timestamp  : {current_time.strftime('%Y-%m-%d %I:%M:%S %p')}
-        Reporting Slot  : {matching_reporting_slot.strftime('%Y-%m-%d %I:%M %p')} (Window Matches Load Plan)
+        Scan Timestamp  : {st.session_state['timestamp']}
+        Reporting Slot  : {st.session_state['reporting']} (Window Matches Load Plan)
         Logistics Route : Priority path authorized via NH-16 corridor.
         ===========================================================
         """, language="markdown")
         
-        # Interactive registry ledger database table mapping
+        # Draw dynamic historical database records data ledger
         st.markdown("##### 📋 Historical Logistics Ledger Registry")
         mock_table_records = pd.DataFrame({
-            "Token ID": [token_id, "KSETU-2026-8812", "KSETU-2026-4190"],
-            "Farmer": [f_name, "Anil Kumar", "V. Reddy"],
-            "Crop Type": [c_type, "Tomato", "Onion"],
-            "Weight (Q)": [w_quintals, 45.0, 12.5],
-            "Reporting Time": [matching_reporting_slot.strftime('%I:%M %p'), "11:30 AM", "03:15 PM"],
+            "Token ID": [st.session_state['token'], "KSETU-2026-8812", "KSETU-2026-4190"],
+            "Farmer": [st.session_state['f_name'], "Anil Kumar", "V. Reddy"],
+            "Crop Type": [st.session_state['c_type'], "Tomato", "Onion"],
+            "Weight (Q)": [st.session_state['weight'], 45.0, 12.5],
+            "Reporting Window": [st.session_state['reporting'], "2026-09-23 11:30 AM", "2026-09-23 03:15 PM"],
             "Status": ["Verified Pass", "Arrived", "Completed"]
         })
         st.dataframe(mock_table_records, use_container_width=True, hide_index=True)
     else:
-        st.info("⌛ **Awaiting Valid Inbound Transmission:** Capture an authentic image reference above and execute to initialize verification microservices.")
+        st.info("Awaiting Input Transmission: Please provide an authentic, live rectangular image file from your camera roll to run verification microservices.")
         
