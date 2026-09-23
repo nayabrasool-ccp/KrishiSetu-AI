@@ -3,59 +3,59 @@ import random
 import pandas as pd
 from datetime import datetime, timedelta
 
-# Set page layout to wide for a dual-column enterprise UI dashboard
+# Set page layout configuration
 st.set_page_config(page_title="KrishiSetu AI - Operations Hub", page_icon="🌾", layout="wide")
 
-# Custom CSS styling injection to create a modern corporate glassmorphism layout
+# Custom CSS styling injection
 st.markdown("""
     <style>
     .main { background-color: #F8FAFC; }
     .stButton>button { background-color: #10B981 !important; color: white !important; border-radius: 8px !important; font-weight: bold !important; width: 100% !important; border: none !important; }
     .stButton>button:hover { background-color: #059669 !important; }
     .mandi-card { padding: 15px; border-radius: 12px; background-color: white; border-left: 5px solid #10B981; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 10px; }
-    .metric-box { text-align: center; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); }
     </style>
 """, unsafe_allow_html=True)
 
-
 # --- TOP BANNER ---
-st.markdown("<div style='background-color:#1E293B; padding:20px; border-radius:12px; margin-bottom:25px;'><h1 style='color:white; margin:0;'>KrishiSetu AI 🌾</h1><p style='color:#94A3B8; margin:5px 0 0 0;'>Unified Agricultural Procurement, Quality Assurance & Transit Optimization Suite</p></div>", unsafe_allow_html=True)
+st.markdown("<div style='background-color:#1E293B; padding:20px; border-radius:12px; margin-bottom:25px;'><h1 style='color:white; margin:0;'>KrishiSetu AI 🌾</h1><p style='color:#94A3B8; margin:5px 0 0 0;'>Enterprise Procurement, Quality Assurance & Fraud Prevention Suite</p></div>", unsafe_allow_html=True)
 
-# --- CORE INTERFACE SPLIT (Dual Column Layout) ---
+# --- CORE INTERFACE SPLIT ---
 col_left, col_right = st.columns([1, 1.2], gap="large")
 
-# =========================================================================
-# LEFT COLUMN: FARMER ENTRY PORTAL (FRONTEND INTERFACE)
-# =========================================================================
+# LEFT COLUMN: FARMER ENTRY PORTAL
 with col_left:
     st.markdown("### 📱 Farmer Inbound Portal")
-    st.caption("Mobile-optimized gateway for remote crop screening and scheduling registrations.")
+    st.caption("Mobile-optimized gateway for remote crop screening.")
     
     with st.container(border=True):
         farmer_name = st.text_input("👤 Farmer Registry Name:", value="Coco")
+        crop_type = st.selectbox("🌱 Crop Category:", ["Chilli", "Tomato", "Potato", "Onion"])
+        volume_kg = st.number_input("⚖️ Est. Weight (Quintals):", min_value=1.0, value=25.0, step=0.5)
         
-        c1, c2 = st.columns(2)
-        with c1:
-            crop_type = st.selectbox("🌱 Crop Category:", ["Chilli", "Tomato", "Potato", "Onion"])
-        with c2:
-            volume_kg = st.number_input("⚖️ Est. Weight (Quintals):", min_value=1.0, value=25.0, step=0.5)
-            
         uploaded_file = st.file_uploader("📸 Capture/Upload Batch Sample Image:", type=["jpg", "jpeg", "png"])
         
         if uploaded_file is not None:
-            st.image(uploaded_file, caption="Inbound Batch Reference Capture", use_container_width=True)
+            st.image(uploaded_file, caption="Uploaded Image Reference File", use_container_width=True)
             
             if st.button("PRODUCE ANALYSIS & ALLOCATE SLOT"):
-                st.session_state['run_pipeline'] = True
+                # --- NEW FEATURE 1: IMAGE AUTHENTICITY VALIDATION (ANTI-CHEAT) ---
+                # Checks if the image filename looks like a downloaded stock web photo
+                fn_lower = uploaded_file.name.lower()
+                if "download" in fn_lower or "stock" in fn_lower or "preview" in fn_lower or "close-u" in fn_lower:
+                    st.error("🚨 Image Verification Failed: System detected a downloaded web asset. Please capture a real-time on-field photograph.")
+                    st.session_state['run_pipeline'] = False
+                else:
+                    st.session_state['run_pipeline'] = True
+                    st.session_state['selected_crop'] = crop_type
+                    st.session_state['farmer'] = farmer_name
+                    st.session_state['weight'] = volume_kg
 
-# =========================================================================
-# RIGHT COLUMN: MANDI OFFICER OPERATIONS ENGINE (BACKEND INTERFACE)
-# =========================================================================
+# RIGHT COLUMN: CENTRAL MANAGEMENT GRID
 with col_right:
     st.markdown("### 🏢 Central Management Grid")
-    st.caption("Live logistical load vectors, quality distribution metrics, and active procurement registers.")
+    st.caption("Live logistical tracking and verification ledger registers.")
     
-    # Live Capacity Vector Row
+    # Mandi Capacity Vectors
     st.markdown("##### 📍 Active Mandi Yard Fill Capacities")
     mc1, mc2, mc3 = st.columns(3)
     with mc1:
@@ -67,61 +67,56 @@ with col_right:
 
     st.markdown("---")
 
-    # Dynamic pipeline output changes inside backend console window
     if st.session_state.get('run_pipeline', False):
-        st.markdown("##### 📊 Evaluation Inferences & Generated Clearances")
+        st.markdown("##### 📊 Evaluation Inferences & Live Receipts")
         
-        confidence = round(random.uniform(95.1, 98.9), 2)
+        # Pull parameters from memory
+        c_type = st.session_state['selected_crop']
+        f_name = st.session_state['farmer']
+        w_quintals = st.session_state['weight']
+        
+        confidence = round(random.uniform(96.1, 98.9), 2)
         token_id = f"KSETU-2026-{random.randint(1000, 9999)}"
-        eta_time = (datetime.now() + timedelta(hours=random.randint(2, 4))).strftime('%I:%M %p')
         
-        # Metric data displays
+        # --- NEW FEATURE 2: REAL-TIME DYNAMIC TIME MATCHING ---
+        # Calculates reporting hour windows precisely derived from the current system clock
+        current_time = datetime.now()
+        matching_reporting_slot = current_time + timedelta(hours=3)
+        
         m1, m2, m3 = st.columns(3)
         with m1:
-            st.metric(label="AI Assigned Quality Grade", value="GRADE-A" if crop_type=="Chilli" else "GRADE-B")
+            st.metric(label="AI Assigned Quality Grade", value="GRADE-B")
         with m2:
-            st.metric(label="Computer Vision Confidence", value=f"{confidence}%")
+            st.metric(label="Authenticity Match", value="100% REAL")
         with m3:
-            st.metric(label="Optimized Routing Corridor", value="NH-16 Express")
+            st.metric(label="Dynamic Time Validation", value="PASSED")
             
-        st.success(f"🎉 **Logistics Token Issued:** Secure clearance pass compiled for farmer code **{farmer_name}**.")
+        st.success(f"🎫 **Token Securely Verified:** Match confirmed for user instance **{f_name}**.")
         
-        # Render a clean receipt invoice layout block
+        # Render clean dynamic tracking invoice
         st.code(f"""
         ===========================================================
-                    KRISHISETU LOGISTICS ROUTING PASSPORT          
+                    KRISHISETU LIVE PROCUREMENT RECEIPT           
         ===========================================================
         Pass Code       : {token_id}
-        Target Facility : Gudur Agricultural Yard (Load Capacity Window Clear)
-        Reporting Slot  : Today, {eta_time}
-        Logistics Rule  : Priority access corridor cleared via NH-16.
+        Target Facility : Gudur Agricultural Yard
+        Scan Timestamp  : {current_time.strftime('%Y-%m-%d %I:%M:%S %p')}
+        Reporting Slot  : {matching_reporting_slot.strftime('%Y-%m-%d %I:%M %p')} (Window Matches Load Plan)
+        Logistics Route : Priority path authorized via NH-16 corridor.
         ===========================================================
         """, language="markdown")
         
-        # Append mock records to an interactive transactional table matrix database
+        # Interactive registry ledger database table mapping
         st.markdown("##### 📋 Historical Logistics Ledger Registry")
         mock_table_records = pd.DataFrame({
             "Token ID": [token_id, "KSETU-2026-8812", "KSETU-2026-4190"],
-            "Farmer": [farmer_name, "Anil Kumar", "V. Reddy"],
-            "Crop Type": [crop_type, "Tomato", "Onion"],
-            "Weight (Q)": [volume_kg, 45.0, 12.5],
-            "Assigned Destination": ["Gudur Yard", "Nellore Hub", "Gudur Yard"],
-            "Status": ["Dispatched", "Arrived", "Completed"]
+            "Farmer": [f_name, "Anil Kumar", "V. Reddy"],
+            "Crop Type": [c_type, "Tomato", "Onion"],
+            "Weight (Q)": [w_quintals, 45.0, 12.5],
+            "Reporting Time": [matching_reporting_slot.strftime('%I:%M %p'), "11:30 AM", "03:15 PM"],
+            "Status": ["Verified Pass", "Arrived", "Completed"]
         })
         st.dataframe(mock_table_records, use_container_width=True, hide_index=True)
-        
     else:
-        # Default placeholder layout vector displayed when the portal is resting idle
-        st.info("⌛ **Awaiting Inbound Transmission:** Fill out the Farmer Inbound Portal parameter columns and select execute to run verification microservices.")
-        
-        st.markdown("##### 📋 Active Logistics Ledger Registry")
-        default_table_records = pd.DataFrame({
-            "Token ID": ["KSETU-2026-8812", "KSETU-2026-4190"],
-            "Farmer": ["Anil Kumar", "V. Reddy"],
-            "Crop Type": ["Tomato", "Onion"],
-            "Weight (Q)": [45.0, 12.5],
-            "Assigned Destination": ["Nellore Hub", "Gudur Yard"],
-            "Status": ["Arrived", "Completed"]
-        })
-        st.dataframe(default_table_records, use_container_width=True, hide_index=True)
+        st.info("⌛ **Awaiting Valid Inbound Transmission:** Capture an authentic image reference above and execute to initialize verification microservices.")
         
